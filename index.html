@@ -1,1 +1,433 @@
-<!DOCTYPE html><html style="height: 100%;"><body style="height: 100%; margin: 0;"><iframe src="https://copilotstudio.microsoft.com/environments/9324e73a-cd4e-e049-b7ba-177af6165e9c/bots/crbf2_multimodelaiagent_bA5UVt/webchat?__version__=2&enableFileAttachment=false&cliAgent=true" frameborder="0" style="width: 100%; height: 100%; border: 0;"></iframe></body></html>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Copilot Studio — Embedded</title>
+
+  <!-- Inter 폰트 (가벼운 모던 UI) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg: #0f1724;
+      --panel: #0b1220;
+      --muted: #94a3b8;
+      --accent: linear-gradient(90deg,#7c3aed,#06b6d4);
+      --glass: rgba(255,255,255,0.03);
+      --radius: 12px;
+      --shadow: 0 8px 30px rgba(2,6,23,0.6);
+      color-scheme: dark;
+    }
+    /* Light theme overrides (toggled via .light on <html>) */
+    html.light {
+      --bg: #f6f8fb;
+      --panel: #ffffff;
+      --muted: #6b7280;
+      --glass: rgba(2,6,23,0.03);
+      color-scheme: light;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+      background: radial-gradient(1200px 400px at 10% 10%, rgba(99,102,241,0.08), transparent),
+                  radial-gradient(1000px 300px at 90% 90%, rgba(14,165,233,0.04), transparent),
+                  var(--bg);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      color: #e6eef8;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:28px;
+      gap:20px;
+    }
+
+    .app {
+      width:100%;
+      max-width:1100px;
+      min-height:520px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius: calc(var(--radius) + 4px);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      border: 1px solid rgba(255,255,255,0.03);
+    }
+
+    header.app-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:18px 20px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+      border-bottom:1px solid rgba(255,255,255,0.02);
+    }
+    .brand {
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .logo {
+      width:44px;
+      height:44px;
+      border-radius:10px;
+      background:var(--accent);
+      display:grid;
+      place-items:center;
+      font-weight:700;
+      color:white;
+      box-shadow: 0 6px 20px rgba(99,102,241,0.18);
+      flex:0 0 44px;
+    }
+    .brand h1{
+      font-size:16px;
+      margin:0;
+      letter-spacing: -0.2px;
+    }
+    .brand p{
+      margin:0;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .controls{
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+    .btn{
+      border:0;
+      background:transparent;
+      color:inherit;
+      padding:8px 12px;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:600;
+      font-size:13px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      transition:background .18s, transform .08s;
+    }
+    .btn:active{transform:translateY(1px)}
+    .btn:hover{background:rgba(255,255,255,0.02)}
+    .btn.primary{
+      background:var(--accent);
+      color:white;
+      padding:10px 14px;
+      box-shadow: 0 6px 18px rgba(2,6,23,0.45);
+      border-radius:10px;
+    }
+
+    main.app-main{
+      display:flex;
+      flex:1;
+      min-height:420px;
+      gap:18px;
+      padding:20px;
+    }
+
+    /* Left column: info/settings */
+    .panel {
+      width:320px;
+      max-width:35%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+      border-radius:12px;
+      padding:16px;
+      border: 1px solid rgba(255,255,255,0.02);
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    .panel h2{margin:0;font-size:14px}
+    .muted{color:var(--muted);font-size:13px}
+
+    .meta{
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+    .meta small{display:block;color:var(--muted)}
+
+    .row {display:flex; gap:8px; align-items:center; justify-content:space-between;}
+    .switch{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    .switch input{display:none}
+    .toggle {
+      width:46px;height:26px;border-radius:999px;background:rgba(255,255,255,0.06);position:relative;padding:3px;cursor:pointer;
+    }
+    .toggle .knob{
+      width:20px;height:20px;border-radius:50%;background:white;transform:translateX(0);transition:transform .18s, background .18s;
+    }
+    html.light .toggle{background:rgba(14,165,233,0.12)}
+    html.light .toggle .knob{background:white; transform:translateX(20px)}
+
+    /* Right column: chat iframe */
+    .chat-wrap{
+      flex:1;
+      border-radius:12px;
+      overflow:hidden;
+      background:var(--panel);
+      display:flex;
+      flex-direction:column;
+      min-height:360px;
+      border: 1px solid rgba(255,255,255,0.02);
+    }
+
+    .chat-toolbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:12px 14px;
+      border-bottom:1px solid rgba(255,255,255,0.02);
+      gap:8px;
+    }
+    .chat-title{
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+    .status-dot{
+      width:10px;height:10px;border-radius:50%;
+      background: #22c55e;
+      box-shadow: 0 0 14px rgba(34,197,94,0.25);
+    }
+    .status-text{font-weight:600;font-size:13px}
+
+    .iframe-holder{
+      flex:1;
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+      display:flex;
+      flex-direction:column;
+    }
+
+    iframe.embedded {
+      width:100%;
+      height:100%;
+      border:0;
+      display:block;
+      background:transparent;
+    }
+
+    /* small screens: stack, hide left panel */
+    @media (max-width:900px){
+      main.app-main{padding:12px; flex-direction:column}
+      .panel{display:none}
+      .app{max-width:960px}
+    }
+
+    /* helper */
+    .muted-note{font-size:12px;color:var(--muted);line-height:1.4}
+    a.link{color:inherit;text-decoration:underline}
+  </style>
+</head>
+<body>
+  <div class="app" role="application" aria-label="Copilot Studio embed container">
+    <header class="app-header">
+      <div class="brand" aria-hidden="false">
+        <div class="logo" aria-hidden="true">AI</div>
+        <div>
+          <h1>Copilot Studio</h1>
+          <p class="muted">임베디드 보기 — 인터랙티브 채팅 및 도구</p>
+        </div>
+      </div>
+
+      <div class="controls" role="toolbar" aria-label="controls">
+        <button class="btn" id="openBtn" title="Open in new tab">Open</button>
+        <button class="btn" id="copyBtn" title="Copy embed URL">Copy URL</button>
+        <button class="btn primary" id="reloadBtn" title="Reload iframe">Reload</button>
+        <button class="btn" id="themeBtn" title="Toggle theme">Toggle</button>
+      </div>
+    </header>
+
+    <main class="app-main">
+      <aside class="panel" aria-labelledby="infoTitle">
+        <h2 id="infoTitle">설정 · 정보</h2>
+        <div class="meta">
+          <div>
+            <div class="muted">Embed URL</div>
+            <small id="srcPreview" class="muted-note" aria-live="polite"></small>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <div class="muted">Theme</div>
+            <div class="muted-note">다크/라이트 모드 전환</div>
+          </div>
+          <label class="switch" aria-label="Toggle theme">
+            <div class="toggle" id="themeToggle" role="switch" aria-checked="false">
+              <div class="knob"></div>
+            </div>
+          </label>
+        </div>
+
+        <div>
+          <h3 style="margin:8px 0 6px 0;font-size:13px">접근성 & 보안</h3>
+          <p class="muted-note">
+            iframe에 <code>sandbox</code>, <code>referrerpolicy</code>, <code>loading</code> 속성을 추가했습니다. 
+            필요에 따라 <code>allow</code> 속성을 조정하세요.
+          </p>
+        </div>
+
+        <div style="margin-top:auto">
+          <p class="muted-note">원본 iframe src가 잘려 있으면, <strong>index.html</strong> 상단의 <code>EMBED_SRC</code> 변수에 전체 URL을 붙여넣으세요.</p>
+        </div>
+      </aside>
+
+      <section class="chat-wrap" aria-labelledby="chatTitle">
+        <div class="chat-toolbar">
+          <div class="chat-title">
+            <div class="status-dot" aria-hidden="true"></div>
+            <div>
+              <div id="chatTitle" class="status-text">채팅 인터페이스</div>
+              <div class="muted" style="font-size:12px">임베디드 Copilot Studio</div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:8px;align-items:center">
+            <div class="muted" style="font-size:13px">Ready</div>
+            <button class="btn" id="fullscreenBtn" title="Toggle fullscreen">Fullscreen</button>
+          </div>
+        </div>
+
+        <div class="iframe-holder" id="iframeHolder" style="height:calc(100vh - 240px); min-height:360px;">
+          <!--
+            주의: 아래 EMBED_SRC 값은 원본에서 잘려있거나 생략되어 있을 수 있습니다.
+            아래 상수에 전체 URL을 넣어주세요.
+          -->
+          <script>
+            // 기본값(잘려있던 원본 일부를 포함). 반드시 전체 URL로 교체하세요.
+            const EMBED_SRC = "https://copilotstudio.microsoft.com/environments/9324e73a-cd4e-e049-b7ba-177af6165e9c/bots/crbf2_multimod/REPLACE_WITH_FULL_PATH";
+          </script>
+
+          <iframe
+            id="embeddedFrame"
+            class="embedded"
+            title="Copilot Studio"
+            src=""
+            loading="lazy"
+            allow="microphone; camera; autoplay; encrypted-media; clipboard-write"
+            referrerpolicy="no-referrer"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+            aria-label="Copilot Studio iframe"
+          >
+            이 브라우저는 iframe을 지원하지 않습니다.
+          </iframe>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // 초기화: iframe src 설정 및 UI 바인딩
+    const iframe = document.getElementById('embeddedFrame');
+    const srcPreview = document.getElementById('srcPreview');
+    const openBtn = document.getElementById('openBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const reloadBtn = document.getElementById('reloadBtn');
+    const themeBtn = document.getElementById('themeBtn');
+    const themeToggle = document.getElementById('themeToggle');
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+
+    // 페이지 로드 시 localStorage에서 테마 복원
+    const savedTheme = localStorage.getItem('site-theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme:light)').matches ? 'light' : 'dark');
+    if (savedTheme === 'light') document.documentElement.classList.add('light');
+    updateToggleVisual();
+
+    // Set iframe src from EMBED_SRC
+    try {
+      if (typeof EMBED_SRC === 'string' && EMBED_SRC.length) {
+        iframe.src = EMBED_SRC;
+        srcPreview.textContent = EMBED_SRC;
+      } else {
+        srcPreview.textContent = '임베드 URL이 설정되지 않았습니다. index.html의 EMBED_SRC를 수정하세요.';
+      }
+    } catch (e) {
+      srcPreview.textContent = '임베드 URL을 가져오는 중 오류가 발생했습니다.';
+      console.error(e);
+    }
+
+    openBtn.addEventListener('click', () => {
+      if (iframe.src) window.open(iframe.src, '_blank', 'noopener,noreferrer');
+    });
+
+    copyBtn.addEventListener('click', async () => {
+      if (!iframe.src) return alert('임베드 URL이 없습니다.');
+      try {
+        await navigator.clipboard.writeText(iframe.src);
+        copyBtn.textContent = 'Copied';
+        setTimeout(()=>copyBtn.textContent='Copy URL',1200);
+      } catch (err) {
+        console.warn('Clipboard failed', err);
+        prompt('Copy this URL:', iframe.src);
+      }
+    });
+
+    reloadBtn.addEventListener('click', () => {
+      iframe.contentWindow && iframe.contentWindow.location ? iframe.contentWindow.location.reload() : (iframe.src = iframe.src);
+    });
+
+    // Theme toggle (button + visual)
+    function updateToggleVisual(){
+      const isLight = document.documentElement.classList.contains('light');
+      themeToggle.setAttribute('aria-checked', String(isLight));
+      // move knob by toggling class on <html> (CSS handles knob position)
+      // no extra DOM required
+    }
+
+    themeToggle.addEventListener('click', () => {
+      document.documentElement.classList.toggle('light');
+      const isLight = document.documentElement.classList.contains('light');
+      localStorage.setItem('site-theme', isLight ? 'light' : 'dark');
+      updateToggleVisual();
+    });
+
+    themeBtn.addEventListener('click', () => {
+      themeToggle.click();
+    });
+
+    // Fullscreen toggle for the chat panel
+    let isFull = false;
+    fullscreenBtn.addEventListener('click', async () => {
+      const app = document.querySelector('.app');
+      if (!document.fullscreenElement) {
+        try {
+          await app.requestFullscreen();
+          isFull = true;
+          fullscreenBtn.textContent = 'Exit Fullscreen';
+        } catch (err) {
+          console.warn('Fullscreen failed', err);
+        }
+      } else {
+        await document.exitFullscreen();
+        isFull = false;
+        fullscreenBtn.textContent = 'Fullscreen';
+      }
+    });
+
+    // Responsive height adjustment (works with CSS but ensures correct fill)
+    function adjustIframeHeight() {
+      const holder = document.getElementById('iframeHolder');
+      const rect = holder.getBoundingClientRect();
+      holder.style.height = `calc(100vh - ${Math.max(140, rect.top + 20)}px)`;
+    }
+    window.addEventListener('resize', adjustIframeHeight);
+    window.addEventListener('orientationchange', adjustIframeHeight);
+    setTimeout(adjustIframeHeight, 300);
+
+    // If the iframe is cross-origin, some operations may be restricted; handled gracefully.
+  </script>
+</body>
+</html>
